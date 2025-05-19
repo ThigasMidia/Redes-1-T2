@@ -1,0 +1,18 @@
+- marcador de inicio: 8 bits
+- end. destino: 2 bits
+- end. origem: 2 bits
+- tipo: 3 bits (jogo, bastão, adicionar ponto, checar 100, termina jogo)
+- dados: 13 bytes
+- checksum: 4 bits
+- ack: 1 bit
+
+tipos:
+
+000 - passagem de bastao 
+001 - começo jogo
+010 - mensagem de rodada que armazena as cartas 
+011 - printa na tela que carta jogou
+100 - __LIVRE__
+101 - adiciona pontos ao vencedor
+110 - checa se algum jogador tem 100 pontos
+111 - fim jogo

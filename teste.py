@@ -1,5 +1,6 @@
 import socket
 import sys
+from aux import message , game
 
 #Definicao de nomes para facilitar
 ANEL = {
@@ -9,12 +10,34 @@ ANEL = {
     "D": {"porta": 46964, "proxima": "A", "ip": "127.0.0.1"},
 }
 
+#msg = message.montaMensagem(3, 2, 1, 6, [4, 8, 16, 32, 64, 128])
+#mensg = message.desmontaMensagem(msg)
+#print(list(msg))
+#print(mensg[0]) # destino
+#print(mensg[1]) # origem
+#print(mensg[2]) # tipo
+#print(mensg[3]) # ack
+#print(mensg[4]) # tam
+#print(list(mensg[5])) # dados
+#message.ackMessage(msg)
+#print(list(msg)) 
+
 #Pega o ID em argv
 if len(sys.argv) != 2:
     print("ENTRADA ERRADA")
     sys.exit(1)
 
 Id = sys.argv[1]
+myId = 0
+
+if Id == 'A':
+    myId = 0
+elif Id == 'B':
+    myId = 1
+elif Id == 'C':
+    myId = 2
+else:
+    myId = 3
 
 #Checa se o ID existe
 if Id not in ANEL:
@@ -33,18 +56,18 @@ nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
 sockt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sockt.bind((ANEL[Id]["ip"], porta))
 
-#cria uma mensagem de 3 bytes
-mensagem = bytearray()
-mensagem.extend([130, 133, 111])
+mesage = message.montaMensagem(3, 1, 0, 0, [])
 
 #D deve ser o ultimo a ser inicializado. Quando ele é inicializado, manda uma mensagem para A
 #Que repassa pelo anel até chegar a D novamente, que vai receber a mensagem e decidir se 
 #A mensagem foi manipualda corretamente pelo anel ou nao
 if Id == "D":
-    sockt.sendto(mensagem , nextPc)
+    sockt.sendto(mesage , nextPc)
     dados, addr = sockt.recvfrom(1024)
+    mesge = message.desmontaMensagem(dados)
+    k = game.trataPassagem(mesge, myId, sockt, nextPc)
     print("MENSAGEM RECEBIDA: ", list(dados))
-    if len(dados) == 4:
+    if k == 1:
         print("DEU CERTO!!!")
     else:
         print("NAO ROLOU")
@@ -57,10 +80,5 @@ else:
     dados, addr = sockt.recvfrom(1024)
     print("MENSAGEM RECEBIDA: ", list(dados))
     louco = bytearray(dados)
-    if Id == "B":
-        louco.append(98)
-        print("PRA MIM: ", list(louco))
-    else:
-        print("NAO E PRA MIM ", len(dados))
-
-    sockt.sendto(louco, nextPc)
+    mesge = message.desmontaMensagem(dados)
+    teste = game.trataPassagem(mesge, myId, sockt, nextPc)
