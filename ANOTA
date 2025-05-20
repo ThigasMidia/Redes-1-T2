@@ -6,13 +6,17 @@
 - checksum: 4 bits
 - ack: 1 bit
 
+destino, origem,  tipo,  ack,  tamanho, checksum,   dados
+
+2 bits   2 bits  3 bits 1 bit  4 bits    4 bits   0-15 bytes
+
 tipos:
 
 000 - passagem de bastao 
-001 - começo jogo
-010 - mensagem de rodada que armazena as cartas 
-011 - printa na tela que carta jogou
-100 - __LIVRE__
+001 - começo conexao
+010 - envia 13 cartas para o destino 
+011 - mensagem de rodada que armazena as cartas
+100 - printa na tela que carta jogou
 101 - adiciona pontos ao vencedor
 110 - checa se algum jogador tem 100 pontos
 111 - fim jogo

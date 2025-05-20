@@ -28,9 +28,6 @@ def montaMensagem(destino, origem, tipo, tam, dados):
     message[2] += calcChecksum(message)
     return message
 
-def ackMessage(msg):
-    return message(,,,,)
-
 def checaMensagem(message):
     if(message[0] != 126):
         return 0
