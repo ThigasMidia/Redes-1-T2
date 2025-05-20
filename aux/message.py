@@ -34,4 +34,19 @@ def checaMensagem(message):
     sum = calcChecksum(message)
     if(sum == message[2] & 0x0F):
         return 1
-    return -1 
+    return -1
+
+def rebroadcast(buffer, socket, nextPc):
+    socket.sendto(buffer, nextPc)
+
+def recebeCartas(msg, dados):
+    envio = bytearray(dados)
+    maoAtual = bytearray(msg[5])
+    envio[1] += 1
+    envio[2] = envio[2] & 0xF0
+    envio[2] += calcChecksum(envio)
+    return maoAtual, envio
+
+def enviaFim(myId, socket, nextPc):
+    buffer = montaMensagem(myId, myId, 7, 0, [])
+    socket.sendto(buffer, nextPc)

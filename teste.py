@@ -23,6 +23,8 @@ if Id not in ANEL:
     sys.exit(1)
 
 myId = 0
+turno = 0
+dono = 0
 
 if Id == 'B':
     myId = 1
@@ -30,6 +32,8 @@ elif Id == 'C':
     myId = 2
 elif Id == 'D':
     myId = 3
+    turno = 1
+    dono = 1
 
 porta = ANEL[Id]["porta"]
 nextId = ANEL[Id]["proxima"]
@@ -50,15 +54,7 @@ jogo = 1
 if myId == 3:
     game.iniciaConexao(sockt, nextPc)
     maoAtual = game.comecaJogo(sockt, myId, nextPc)
-    print(list(maoAtual))
-    buffer = message.montaMensagem(3, 3, 7, 0, [])
-    sockt.sendto(buffer, nextPc)
-    dados, addr = sockt.recvfrom(1024)
-    msg = message.desmontaMensagem(dados)
-    if msg[2] == 7:
-        print("DEU CERTO!!!!!")
-    else:
-        print("NAO ROLOU")
+    game.iniciaConexao(sockt, nextPc)
 
 #A mensagem tem como destino o B. caso seja B, adiciona outro byte à mensagem
 #"dados" é uma constante, entao nao se pode fazer append. Devemos armazenar seu conteudo em outro
@@ -70,19 +66,18 @@ else:
         dados, addr = sockt.recvfrom(1024)
         msg = message.desmontaMensagem(dados)
         if(message.checaMensagem(dados) == 1):
-            if msg[2] == 7:
+            if msg[2] == 1:
                 jogo = 0
-                sockt.sendto(dados, nextPc)
+                rebroadcast(dados, sockt, nextPc)
             else:
                 envio = bytearray(dados)
                 if msg[0] == myId:
-                    maoAtual = bytearray(msg[5])
-                    envio[1] += 1
-                    envio[2] = envio[2] & 0xF0
-                    envio[2] += message.calcChecksum(envio)
-            
+                    maoAtual, envio = message.recebeCartas(msg, dados)
                 sockt.sendto(envio, nextPc)
         else:
-            sockt.sendto(dados, nextPc)
-    
-    print(list(maoAtual))
+            rebroadcast(dados, sockt, nextPc)
+
+jogo = 1
+while jogo == 1:
+    if dono == 1:
+        rodada = message.montaMensagem(myId, myId, 3, 0, [])

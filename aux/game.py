@@ -27,7 +27,6 @@ def comecaJogo(socket, myId, nextPc):
             bufferReceive, addr = socket.recvfrom(1024)
             messageReceive = message.desmontaMensagem(bufferReceive)
             if(messageReceive[3] == 0):
-                print("ERRO: MANDANDO DNV")
                 it -= 1
 
         else:

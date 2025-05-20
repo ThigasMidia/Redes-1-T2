@@ -13,7 +13,7 @@ destino, origem,  tipo,  ack,  tamanho, checksum,   dados
 tipos:
 
 000 - passagem de bastao 
-001 - começo conexao
+001 - começo conexao/jogo
 010 - envia 13 cartas para o destino 
 011 - mensagem de rodada que armazena as cartas
 100 - printa na tela que carta jogou
