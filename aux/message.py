@@ -4,7 +4,7 @@ MARCADOR_INI = 126
 def calcChecksum(message):
     ret = (message[1] & 0xF0) + (message[1] & 0x0F) 
     tam = message[2] >> 4
-    for i in range(3,tam+3):
+    for i in range(3,tam+1):
         ret += (message[i] & 0xF0) + (message[i] & 0x0F)
     return ret % 16
 
