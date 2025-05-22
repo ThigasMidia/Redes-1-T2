@@ -98,8 +98,62 @@ def geraMaos():
     ret = (maoA, maoB, maoC, maoD)
     return ret
 
-def imprimeJogada(dados):
-    print("JOGADOR ", dados[0]," JOGOU A CARTA ", dados[1])
+def decideNaipe(roundCards):
+    if roundCards <= 12:
+        naipe = 1
+    elif roundCards >= 13 and roundCards <= 25:
+        naipe = 2
+    elif roundCards >= 26 and roundCards <= 38:
+        naipe = 3
+    else:
+        naipe = 4
+    return naipe
+
+def checaNaipe(maoAtual, naipe):
+    ret = 0
+    it = 0
+    while ret == 0 and it < len(maoAtual):
+        if decideNaipe(maoAtual[it]) == naipe:
+            ret = 1
+        it += 1
+    return ret
+
+def somaPontos(roundCards):
+    soma = 0
+    for i in range(3, 7):
+        if decideNaipe(roundCards[i]) == 4:
+            soma += 1
+        elif roundCards[i] == 10:
+            soma += 10
+
+    return soma
+
+def decideVencedor(roundCards):
+    naipe = decideNaipe(roundCards[3])
+    bigger = 1
+    for i in range (4,7):
+        if decideNaipe(roundCards[i]) == naipe and roundCards[i] > roundCards[bigger+2]:
+            bigger = i-2
+    return bigger
+
+def imprimeJogada(msg):
+    if msg[4] == 2:
+        print("JOGADOR ", msg[5][0]," JOGOU A CARTA ", end="")
+        naipe = decideNaipe(msg[5][1])
+        num = numToCarta(msg[5][1])
+        if naipe == 1:
+            print("♠ ", end="")
+        elif naipe == 2:
+            print("♦ ", end="")
+        elif naipe == 3:
+            print("♣ ", end="")
+        else:
+            print("♥ ", end="")
+        print(num)
+    elif msg[4] == 1:
+        print("JOGADOR ", msg[5][0]," VENCEU A RODADA!!!")
+    else:
+        print("JOGADOR", msg[5][0]," VENCEU O JOGO!!!")
 
 def removeCarta(mao, numero):
     mao.pop(numero)

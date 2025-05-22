@@ -36,6 +36,13 @@ def checaMensagem(message):
         return 1
     return -1
 
+def broadcastAck(buffer, socket, nextPc):
+    buf = bytearray(buffer)
+    buf[1] += 1
+    buf[2] = buf[2] & 0xF0
+    buf[2] += calcChecksum(buf)
+    socket.sendto(buf, nextPc)
+
 def rebroadcast(buffer, socket, nextPc):
     socket.sendto(buffer, nextPc)
 
