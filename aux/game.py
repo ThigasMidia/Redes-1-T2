@@ -64,18 +64,19 @@ def numToCarta(num):
     elif num == 12 or num == 25 or num == 38 or num == 51:
         return "A"
 
-def imprimeMao(mao):
+def imprimeMao(mao, pontos):
     tam = len(mao)
     for i in range(0, tam):
+        carac = str(i+1)
         if mao[i] <= 12:
-            print("♠", numToCarta(mao[i]), "  ", end="")
+            print("♠", numToCarta(mao[i]), "(" + carac + ") ")
         elif mao[i] >= 13 and mao[i] <= 25:
-            print("♦", numToCarta(mao[i]), "  ", end="")
+            print("♦", numToCarta(mao[i]), "(" + carac + ") ")
         elif mao[i] >= 26 and mao[i] <= 38:
-            print("♣", numToCarta(mao[i]), "  ", end="")
+            print("♣", numToCarta(mao[i]), "(" + carac + ") ")
         else:
-            print("♥", numToCarta(mao[i]), "  ", end="")
-    print()
+            print("♥", numToCarta(mao[i]), "(" + carac + ") ")
+    print("PONTOS: ", pontos)
     
 def geraMaos():
     it = 0
@@ -150,10 +151,37 @@ def imprimeJogada(msg):
         else:
             print("♥ ", end="")
         print(num)
-    elif msg[4] == 1:
+    else: 
         print("JOGADOR ", msg[5][0]," VENCEU A RODADA!!!")
-    else:
-        print("JOGADOR", msg[5][0]," VENCEU O JOGO!!!")
+
+
+def decideVencedorJogo(myId, tam, pontos):
+    i = 0
+    menor = 33
+    vencedores = bytearray()
+    for i in range(0, tam):
+        if pontos[i] < menor:
+            menor = pontos[i]
+
+    for i in range(0, tam):
+        if pontos[i] == menor:
+            vencedores.append(i)
+    
+    ret = bytearray()
+    tam = 0
+    for i in range(0, len(vencedores)):
+        ret.append((myId + vencedores[i]) % 4)
+        tam += 1
+    return ret, tam
+
+def checa33Pontos(tam, dados):
+    flag = 0
+    i = 0
+    while i < tam and flag == 0:
+        if dados[i] >= 33:
+            flag = 1
+        i += 1
+    return flag 
 
 def removeCarta(mao, numero):
     mao.pop(numero)

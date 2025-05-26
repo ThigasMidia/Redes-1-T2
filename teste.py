@@ -89,7 +89,7 @@ while jogo == 1:
         roundCards = message.montaMensagem(myId, myId, 3, 0, [])
         dono = 0
     
-    game.imprimeMao(maoAtual)
+    game.imprimeMao(maoAtual, pontos)
     #enquanto há cartas nas maos dos jogadores
     while rodada == 1:
         #se é seu turno de jogar
@@ -135,18 +135,22 @@ while jogo == 1:
                         msg = message.desmontaMensagem(buf)
                     
                     elif msg[2] == 5:
-                        game.imprimeMao(maoAtual)
                         if msg[3] != 1:
                             pontos += msg[5][0]
                             roundCards = message.montaMensagem(myId, myId, 3, 0, [])
+                            printa = message.montaMensagem(myId, myId, 1, 0, [])
                     
                         else:
                             printa = message.montaMensagem(winnerId, myId, 0, 0, [])
-                            sockt.sendto(printa, nextPc)
                             turno = 0
+                        
+                        sockt.sendto(printa, nextPc)
+                        buf, addr = sockt.recvfrom(1024)
+                        msg = message.desmontaMensagem(buf)
                         if len(maoAtual) == 0:
                             rodada = 0
                         loop = 0
+                        game.imprimeMao(maoAtual, pontos)
 
                     #Se recebeu novamente a mensagem com as cartas jogadas na rodada
                     elif msg[2] == 3:
@@ -177,13 +181,17 @@ while jogo == 1:
                     game.imprimeJogada(msg)  
                     message.rebroadcast(roda, sockt, nextPc)
                 elif msg[2] == 5:
-                    game.imprimeMao(maoAtual)
                     roundCards = message.montaMensagem(myId, myId, 3, 0, [])
                     if msg[0] == myId:
                         pontos += msg[5][0]
+                        game.imprimeMao(maoAtual, pontos)
                         message.broadcastAck(roda, sockt, nextPc)
                     else:
+                        game.imprimeMao(maoAtual, pontos)
                         message.rebroadcast(roda, sockt, nextPc)
+                elif msg[2] == 1:
+                    rodada = 0
+                    message.rebroadcast(roda, sockt, nextPc)
                 #Se é mensagem de cartas da rodada, armazena os resultados e reenvia
                 elif msg[2] == 3:
                     roundCards = bytearray(roda)  
@@ -207,60 +215,67 @@ while jogo == 1:
 
     if turno == 1:
         checaFim = message.montaMensagem(myId, myId, 6, 0, [])
+        checaFim.append(pontos)
+        checaFim[2] = checaFim[2] & 0xF0
+        checaFim[2] += 16
+        checaFim[2] += message.calcChecksum(checaFim)
         sockt.sendto(checaFim, nextPc)
         buf, addr = sockt.recvfrom(1024)
-        print("DEPOIS DO BUF")
         msg = message.desmontaMensagem(buf)
         loop = 1
         while loop == 1 and jogo == 1:
-            print("entrou LOOP")
             if(message.checaMensagem(buf) == 1):
                 if msg[2] == 6:
-                    if msg[4] != 0:
-                        FIM = message.montaMensagem(myId, myId, 7, 0, [])
+                    if game.checa33Pontos(msg[4], msg[5]) == 1:
+                        vencedor, quantos = game.decideVencedorJogo(myId, msg[4], msg[5])
+                        FIM = message.montaMensagem(myId, myId, 7, quantos, vencedor)
                         sockt.sendto(FIM, nextPc)
+                        buf, addr = sockt.recvfrom(1024)
+                        msg = message.desmontaMensagem(buf)
 
                     else:
                         maoAtual = game.comecaJogo(sockt, myId, nextPc)
-                        game.iniciaConexao(sock, nextPc)
+                        game.iniciaConexao(sockt, nextPc)
                         rodada = 1
                         loop = 0
+
                 elif msg[2] == 7:
                     jogo = 0
+                    if msg[4] == 1:
+                        print("JOGADOR", msg[5][0], "VENCEU O JOGO COM A MENOR QUANTIDADE DE PONTOS!!!!")
+                    else:
+                        print("EMPATE!! JOGADORES", list(msg[5]), "VENCERAM O JOGO COM A MENOR E MESMA QUANTIDADE DE PONTOS!!!!")
 
     else:
-        print("ELSE")
-        roda, addr = sockt.recvfrom(1024)
-        print("RECEBEU A PRIMEIRA DPS")
-        msg = message.desmontaMensagem(roda)
         interludio = 1
         while interludio == 1 and jogo == 1:
+            roda, addr = sockt.recvfrom(1024)
+            msg = message.desmontaMensagem(roda)
             if(message.checaMensagem(roda) == 1):
-                print("TA CHEGANDO DENTRO DESSE LOOP AQUI!")
                 if msg[2] == 6:
-                    print("TIPO 6!!!")
                     checaFim = bytearray(roda)
-                    if pontos >= 100:
-                        checaFim.append(pontos)
-                        checaFim[2] = checaFim[2] & 0xF0
-                        checaFim[2] += 16
-                        checaFim[2] += message.calcChecksum(checaFim)
+                    checaFim.append(pontos)
+                    checaFim[2] = checaFim[2] & 0xF0
+                    checaFim[2] += 16
+                    checaFim[2] += message.calcChecksum(checaFim)
                     sockt.sendto(checaFim, nextPc)
 
                 elif msg[2] == 7:
-                    print("TIPO 7!!!")
                     jogo = 0
                     message.rebroadcast(roda, sockt, nextPc)
+                    if msg[4] == 1:
+                        print("JOGADOR", msg[5][0], "VENCEU O JOGO COM A MENOR QUANTIDADE DE PONTOS!!!!")
+                    else:
+                        print("EMPATE!! JOGADORES", list(msg[5]), "VENCERAM O JOGO COM A MENOR E MESMA QUANTIDADE DE PONTOS!!!!")
 
                 elif msg[2] == 2:
-                    print("TIPO 2!!!")
                     envio = bytearray(roda)
                     if msg[0] == myId:
                         maoAtual, envio = message.recebeCartas(msg, roda)
                     sockt.sendto(envio, nextPc)
 
                 elif msg[2] == 1:
-                    print("TIPO 1!!!")
                     interludio = 0
                     rodada = 1
                     message.rebroadcast(roda, sockt, nextPc)
+
