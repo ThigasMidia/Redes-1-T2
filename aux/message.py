@@ -54,6 +54,14 @@ def recebeCartas(msg, dados):
     envio[2] += calcChecksum(envio)
     return maoAtual, envio
 
-def enviaFim(myId, socket, nextPc):
-    buffer = montaMensagem(myId, myId, 7, 0, [])
-    socket.sendto(buffer, nextPc)
+def recebeMensagem(socket):
+    buf, addr = socket.recvfrom(1024)
+    msg = desmontaMensagem(buf)
+    return buf, msg
+
+def enviaChecaFim(checaFim, pontos, socket, nextPc):
+    checaFim.append(pontos)
+    checaFim[2] = checaFim[2] & 0xF0
+    checaFim[2] += 16
+    checaFim[2] += calcChecksum(checaFim)
+    socket.sendto(checaFim, nextPc)

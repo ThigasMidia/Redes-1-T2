@@ -92,6 +92,10 @@ def geraMaos():
     maoC = bytearray()
     maoD = bytearray()
     it = 0
+    #maoA.append(50)
+    #maoB.append(44)
+    #maoC.append(45)
+    #maoD.append(51)
     maoA[0:13] = deque[0:13]
     maoB[0:13] = deque[13:26]
     maoC[0:13] = deque[26:39]
@@ -139,7 +143,7 @@ def decideVencedor(roundCards):
 
 def imprimeJogada(msg):
     if msg[4] == 2:
-        print("JOGADOR ", msg[5][0]," JOGOU A CARTA ", end="")
+        print("JOGADOR ", playerIdToChar(msg[5][0])," JOGOU A CARTA ", end="")
         naipe = decideNaipe(msg[5][1])
         num = numToCarta(msg[5][1])
         if naipe == 1:
@@ -152,7 +156,7 @@ def imprimeJogada(msg):
             print("♥ ", end="")
         print(num)
     else: 
-        print("JOGADOR ", msg[5][0]," VENCEU A RODADA!!!")
+        print("JOGADOR ", playerIdToChar(msg[5][0])," VENCEU A RODADA!!!")
 
 
 def decideVencedorJogo(myId, tam, pontos):
@@ -182,6 +186,26 @@ def checa33Pontos(tam, dados):
             flag = 1
         i += 1
     return flag 
+
+def playerIdToChar(Id):
+    if Id == 0:
+        ret = "A"
+    elif Id == 1:
+        ret = "B"
+    elif Id == 2:
+        ret = "C"
+    else:
+        ret = "D"
+
+    return ret
+
+def IdToCharArray(IdA, tam):
+    ret = str("")
+    for i in range(0, tam-1):
+        ret += playerIdToChar(IdA[i])
+        ret += ","
+    ret += playerIdToChar(IdA[tam-1])
+    return ret
 
 def removeCarta(mao, numero):
     mao.pop(numero)
