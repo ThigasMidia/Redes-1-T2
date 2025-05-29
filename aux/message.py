@@ -1,6 +1,24 @@
-PORTA = 46961
 MARCADOR_INI = 126
 
+#Macros de elementos da mensagem
+MSG_DEST = 0
+MSG_ORIG = 1
+MSG_TYPE = 2
+MSG_ACK = 3
+MSG_SIZE = 4
+MSG_DATA = 5
+
+#Macros de tipo de mensagem
+BATON = 0
+CONNECT = 1
+SENDHAND = 2
+ROUND = 3
+PRINT = 4
+POINTS = 5
+CHECK = 6
+END = 7
+
+#Calcula checksum
 def calcChecksum(message):
     ret = (message[1] & 0xF0) + (message[1] & 0x0F) 
     tam = message[2] >> 4
@@ -8,6 +26,7 @@ def calcChecksum(message):
         ret += (message[i] & 0xF0) + (message[i] & 0x0F)
     return ret % 16
 
+#Desmonta um buffer de mensagem numa tupla
 def desmontaMensagem(message):
     destino = message[1] >> 6
     origem = (message[1] & 48) >> 4
@@ -19,6 +38,7 @@ def desmontaMensagem(message):
     msg = (destino, origem, tipo, ack, tam, dados)
     return msg
 
+#Monta dados em um buffer de mensagem
 def montaMensagem(destino, origem, tipo, tam, dados):
     message = bytearray()
     message.append(MARCADOR_INI)
@@ -28,6 +48,7 @@ def montaMensagem(destino, origem, tipo, tam, dados):
     message[2] += calcChecksum(message)
     return message
 
+#Faz o checksum
 def checaMensagem(message):
     if(message[0] != 126):
         return 0
@@ -36,6 +57,7 @@ def checaMensagem(message):
         return 1
     return -1
 
+#Troca o Ack da mensagem para 1 e repassa
 def broadcastAck(buffer, socket, nextPc):
     buf = bytearray(buffer)
     buf[1] += 1
@@ -43,22 +65,17 @@ def broadcastAck(buffer, socket, nextPc):
     buf[2] += calcChecksum(buf)
     socket.sendto(buf, nextPc)
 
+#Repassa mensagem
 def rebroadcast(buffer, socket, nextPc):
     socket.sendto(buffer, nextPc)
 
-def recebeCartas(msg, dados):
-    envio = bytearray(dados)
-    maoAtual = bytearray(msg[5])
-    envio[1] += 1
-    envio[2] = envio[2] & 0xF0
-    envio[2] += calcChecksum(envio)
-    return maoAtual, envio
-
+#Recebe mensagem
 def recebeMensagem(socket):
     buf, addr = socket.recvfrom(1024)
     msg = desmontaMensagem(buf)
     return buf, msg
 
+#Concatena pontos, recalcula checksum e envia
 def enviaChecaFim(checaFim, pontos, socket, nextPc):
     checaFim.append(pontos)
     checaFim[2] = checaFim[2] & 0xF0

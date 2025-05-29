@@ -2,17 +2,17 @@ from aux import message
 import random
 
 def trataPassagem(msg, myId):
-    if msg[0] == msg[1]:
+    if msg[message.MSG_DEST] == msg[message.MSG_ORIG]:
         return 0
 
     ret = 1
-    if msg[0] == myId:
+    if msg[message.MSG_DEST] == myId:
         ret = 2
     
     return ret
 
 def iniciaConexao(socket, nextPc):
-    inicio = message.montaMensagem(3, 3, 1, 0, [])
+    inicio = message.montaMensagem(3, 3, message.CONNECT, 0, [])
     socket.sendto(inicio, nextPc)
     dados, addr = socket.recvfrom(1024)
 
@@ -22,11 +22,11 @@ def comecaJogo(socket, myId, nextPc):
     while it < 4:
         atual = bytearray(deque[it])
         if it != myId:
-            cartas = message.montaMensagem(it,myId,2,13,atual)
+            cartas = message.montaMensagem(it, myId, message.SENDHAND, 13, atual)
             socket.sendto(cartas, nextPc)
             bufferReceive, addr = socket.recvfrom(1024)
             messageReceive = message.desmontaMensagem(bufferReceive)
-            if(messageReceive[3] == 0):
+            if(messageReceive[message.MSG_ACK] == 0):
                 it -= 1
 
         else:
@@ -35,6 +35,32 @@ def comecaJogo(socket, myId, nextPc):
         it += 1
 
     return ret
+
+def recebeCartas(msg, dados):
+    envio = bytearray(dados)
+    maoAtual = bytearray(msg[message.MSG_DATA])
+    envio[1] += 1
+    envio[2] = envio[2] & 0xF0
+    envio[2] += message.calcChecksum(envio)
+    return maoAtual, envio
+
+def lePosicao(roundCards, maoAtual):
+    if len(roundCards) == 3:
+        posicao = int(input("ESCOLHA UMA CARTA (DIGITE O NÚMERO DA POSIÇÃO):  "))
+        while posicao < 1 or posicao > len(maoAtual):
+            posicao = int(input("ESTA CARTA NÃO EXISTE!!  "))
+    else:
+        naipe = decideNaipe(roundCards[3])
+        if checaNaipe(maoAtual, naipe) == 1:
+            posicao = int(input("ESCOLHA UMA CARTA DO MESMO NAIPE DA PRIMEIRA (DIGITE O NÚMERO DA POSIÇÃO):  "))
+            while posicao < 1 or posicao > len(maoAtual) or decideNaipe(maoAtual[posicao-1]) != naipe:
+                posicao = int(input("ESTA CARTA NÃO EXISTE OU NÃO É DO MESMO NAIPE DA PRIMEIRA!!  "))
+        else:
+            posicao = int(input("VOCE NÃO POSSUI UMA CARTA DO MESMO NAIPE. ESCOLHA QUALQUER UMA (DIGITE O NÚMERO DA POSIÇÃO)"))
+            while posicao < 1 or posicao > len(maoAtual):
+                posicao = int(input("ESTA CARTA NÃO EXISTE!!  "))
+
+    return posicao
 
 def numToCarta(num):
     if num == 0 or num == 13 or num == 26 or num == 39:
@@ -142,10 +168,10 @@ def decideVencedor(roundCards):
     return bigger
 
 def imprimeJogada(msg):
-    if msg[4] == 2:
-        print("JOGADOR ", playerIdToChar(msg[5][0])," JOGOU A CARTA ", end="")
-        naipe = decideNaipe(msg[5][1])
-        num = numToCarta(msg[5][1])
+    if msg[message.MSG_SIZE] == 2:
+        print("JOGADOR ", playerIdToChar(msg[message.MSG_DATA][0])," JOGOU A CARTA ", end="")
+        naipe = decideNaipe(msg[message.MSG_DATA][1])
+        num = numToCarta(msg[message.MSG_DATA][1])
         if naipe == 1:
             print("♠ ", end="")
         elif naipe == 2:
@@ -156,7 +182,7 @@ def imprimeJogada(msg):
             print("♥ ", end="")
         print(num)
     else: 
-        print("JOGADOR ", playerIdToChar(msg[5][0])," VENCEU A RODADA!!!")
+        print("JOGADOR ", playerIdToChar(msg[message.MSG_DATA][0])," VENCEU A RODADA!!!")
 
 
 def decideVencedorJogo(myId, tam, pontos):
@@ -198,6 +224,12 @@ def playerIdToChar(Id):
         ret = "D"
 
     return ret
+
+def printFim(msg):
+    if msg[message.MSG_SIZE] == 1:
+        print("JOGADOR", playerIdToChar(msg[message.MSG_DATA][0]), "VENCEU O JOGO COM A MENOR QUANTIDADE DE PONTOS!!!!")
+    else:
+        print("EMPATE!! JOGADORES",IdToCharArray(msg[message.MSG_DATA], msg[message.MSG_SIZE]), "VENCERAM O JOGO COM A MENOR E MESMA QUANTIDADE DE PONTOS!!!!")
 
 def IdToCharArray(IdA, tam):
     ret = str("")
