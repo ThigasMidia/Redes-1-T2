@@ -1,4 +1,5 @@
 MARCADOR_INI = 126
+PORTA = 46964
 
 #Macros de elementos da mensagem
 MSG_DEST = 0

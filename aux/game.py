@@ -46,19 +46,37 @@ def recebeCartas(msg, dados):
 
 def lePosicao(roundCards, maoAtual):
     if len(roundCards) == 3:
-        posicao = int(input("ESCOLHA UMA CARTA (DIGITE O NÚMERO DA POSIÇÃO):  "))
+        posi = input("ESCOLHA UMA CARTA (DIGITE O NÚMERO DA POSIÇÃO):  ")
+        while posi.isnumeric() == False:
+            posi = input("DIGITE UM NÚMERO!!!!  ")
+        posicao = int(posi)
         while posicao < 1 or posicao > len(maoAtual):
-            posicao = int(input("ESTA CARTA NÃO EXISTE!!  "))
+            posi = input("ESTA CARTA NÃO EXISTE!!  ")
+            while posi.isnumeric() == False:
+                posi = input("DIGITE UM NÚMERO!!!!  ")
+            posicao = int(posi)
     else:
         naipe = decideNaipe(roundCards[3])
         if checaNaipe(maoAtual, naipe) == 1:
-            posicao = int(input("ESCOLHA UMA CARTA DO MESMO NAIPE DA PRIMEIRA (DIGITE O NÚMERO DA POSIÇÃO):  "))
+            posi = input("ESCOLHA UMA CARTA DO MESMO NAIPE DA PRIMEIRA (DIGITE O NÚMERO DA POSIÇÃO):  ")
+            while posi.isnumeric() == False:
+                posi = input("DIGITE UM NÚMERO!!!!  ")
+            posicao = int(posi)
             while posicao < 1 or posicao > len(maoAtual) or decideNaipe(maoAtual[posicao-1]) != naipe:
-                posicao = int(input("ESTA CARTA NÃO EXISTE OU NÃO É DO MESMO NAIPE DA PRIMEIRA!!  "))
+                posi = input("ESTA CARTA NÃO EXISTE OU NÃO É DO MESMO NAIPE DA PRIMEIRA!!  ")
+                while posi.isnumeric() == False:
+                    posi = input("DIGITE UM NÚMERO!!!!  ")
+                posicao = int(posi)
         else:
-            posicao = int(input("VOCE NÃO POSSUI UMA CARTA DO MESMO NAIPE. ESCOLHA QUALQUER UMA (DIGITE O NÚMERO DA POSIÇÃO)"))
+            posi = input("VOCE NÃO POSSUI UMA CARTA DO MESMO NAIPE. ESCOLHA QUALQUER UMA (DIGITE O NÚMERO DA POSIÇÃO)  ")
+            while posi.isnumeric() == False:
+                posi = input("DIGITE UM NÚMERO!!!!  ")
+            posicao = int(posi)
             while posicao < 1 or posicao > len(maoAtual):
-                posicao = int(input("ESTA CARTA NÃO EXISTE!!  "))
+                posi = input("ESTA CARTA NÃO EXISTE!!  ")
+                while posi.isnumeric() == False:
+                    posi = input("DIGITE UM NÚMERO!!!!  ")
+                posicao = int(posi)
 
     return posicao
 

@@ -4,25 +4,25 @@ from aux import message , game
 
 #Definicao de nomes para facilitar
 ANEL = {
-    "A": {"porta": 46961, "proxima": "B", "ip": "127.0.0.1"},
-    "B": {"porta": 46962, "proxima": "C", "ip": "127.0.0.1"},
-    "C": {"porta": 46963, "proxima": "D", "ip": "127.0.0.1"},
-    "D": {"porta": 46964, "proxima": "A", "ip": "127.0.0.1"},
+    "A": {"proxima": "B"},
+    "B": {"proxima": "C"},
+    "C": {"proxima": "D"},
+    "D": {"proxima": "A"},
 }
 
 #Pega o ID em argv
 if len(sys.argv) != 2:
-    print("ENTRADA ERRADA")
+    print("ENTRADA ERRADA! USO: python3 teste.py <id>")
     sys.exit(1)
 
-Id = sys.argv[1]
+Id = sys.argv[1].upper()
 
-nome1 = socket.gethostname()
-tamNome = len(nome1)
+myName = socket.gethostname()
+tamNome = len(myName)
 
 #Checa se o ID existe
 if Id not in ANEL:
-    print("OPCAO DE ID INVALIDA")
+    print("OPÇÃO DE ID INVALIDA!   OPÇÕES: A or a , B or b, C or c and D or d")
     sys.exit(1)
 
 myId = 0
@@ -38,31 +38,31 @@ elif Id == 'D':
     turno = 1
     dono = 1
 
-#print(nome1)
-#aux = int(nome1[tamNome-1])
-#print(aux)
-#if myId == 3:
-#    aux -= 3
-#else:
-#    aux += 1
+if myName[tamNome-2] != ".":
+    aux = (int(myName[tamNome-2]) * 10) + int(myName[tamNome-1])
+else:
+    aux = int(myName[tamNome-1])
 
-#nome = nome1[:tamNome-1] + str(aux)
-#print(aux)
-#ipMeu = socket.gethostbyname(nome1)
-#ipProx = socket.gethostbyname(nome)
+if myId == 3:
+    aux -= 3
+else:
+    aux += 1
 
-porta = ANEL[Id]["porta"]
+nome = myName[:tamNome-2] + str(aux // 10) + str(aux % 10)
+ipMeu = socket.gethostbyname(myName)
+ipProx = socket.gethostbyname(nome)
+
 nextId = ANEL[Id]["proxima"]
 
 #Endereco do destino da mensagem do pc iniciado. guarda ip do proximo e porta do proximo
 #No projeto, a porta sera a mesma para todos os computadores e o id deve ser pego de outra maneira
 
-#nextPc = (ipProx, 46961)
-nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
+nextPc = (ipProx, message.PORTA)
+#nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
 
 #bind no socket
 sockt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sockt.bind((ANEL[Id]["ip"], porta))
+sockt.bind((ipMeu, message.PORTA))
 
 maoAtual = bytearray()
 jogo = 1
