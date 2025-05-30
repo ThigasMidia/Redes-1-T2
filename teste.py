@@ -1,13 +1,14 @@
 import socket
 import sys
+import os
 from aux import message , game
 
 #Definicao de nomes para facilitar
 ANEL = {
-    "A": {"proxima": "B"},
-    "B": {"proxima": "C"},
-    "C": {"proxima": "D"},
-    "D": {"proxima": "A"},
+    "A": {"proxima": "B", "ip": "127.0.0.1", "porta": 46961},
+    "B": {"proxima": "C", "ip": "127.0.0.1", "porta": 46962},
+    "C": {"proxima": "D", "ip": "127.0.0.1", "porta": 46963},
+    "D": {"proxima": "A", "ip": "127.0.0.1", "porta": 46964},
 }
 
 #Pega o ID em argv
@@ -57,12 +58,14 @@ nextId = ANEL[Id]["proxima"]
 #Endereco do destino da mensagem do pc iniciado. guarda ip do proximo e porta do proximo
 #No projeto, a porta sera a mesma para todos os computadores e o id deve ser pego de outra maneira
 
-nextPc = (ipProx, message.PORTA)
-#nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
+#nextPc = (ipProx, message.PORTA)
+nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
 
 #bind no socket
 sockt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sockt.bind((ipMeu, message.PORTA))
+#sockt.bind((ipMeu, message.PORTA))
+
+sockt.bind((ANEL[Id]["ip"], ANEL[Id]["porta"]))
 
 maoAtual = bytearray()
 jogo = 1
@@ -131,6 +134,8 @@ while jogo == 1:
                 if(message.checaMensagem(buf) == 1):
                     #Recebeu novamente a propria mensagem de print. Descarta e envia a mensagem com as cartas jogadas na rodada
                     if msg[message.MSG_TYPE] == message.PRINT:
+                        if msg[message.MSG_SIZE] != 2:
+                            os.system('clear')
                         game.imprimeJogada(msg)
                         if msg[message.MSG_SIZE] == 2:
                             sockt.sendto(roundCards, nextPc)
@@ -191,6 +196,8 @@ while jogo == 1:
             if(message.checaMensagem(roda) == 1):
                 #Se a mensagem é para print de jogada, o faz e repassa
                 if msg[message.MSG_TYPE] == message.PRINT:
+                    if msg[message.MSG_SIZE] != 2:
+                        os.system('clear')
                     game.imprimeJogada(msg)  
                     message.rebroadcast(roda, sockt, nextPc)
 

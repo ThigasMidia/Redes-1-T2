@@ -257,6 +257,14 @@ def IdToCharArray(IdA, tam):
     ret += playerIdToChar(IdA[tam-1])
     return ret
 
+def printCards(mao):
+    tam = len(mao)
+    for i in range(0, tam):
+        print(" _________ ", end="")
+    print()
+    for i in range(0, tam):
+        print("|", end="")
+
 def removeCarta(mao, numero):
     mao.pop(numero)
 
