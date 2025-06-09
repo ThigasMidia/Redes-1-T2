@@ -1,7 +1,7 @@
 import socket
 import sys
 import os
-from aux import message , game , printing
+from libs import message , game , printing
 
 #Definicao de nomes para facilitar
 ANEL = {
@@ -39,33 +39,33 @@ elif Id == 'D':
     turno = 1
     dono = 1
 
-#if myName[tamNome-2] != ".":
-#    aux = (int(myName[tamNome-2]) * 10) + int(myName[tamNome-1])
-#else:
-#    aux = int(myName[tamNome-1])
+if myName[tamNome-2] != ".":
+    aux = (int(myName[tamNome-2]) * 10) + int(myName[tamNome-1])
+else:
+    aux = int(myName[tamNome-1])
 
-#if myId == 3:
-#    aux -= 3
-#else:
-#    aux += 1
+if myId == 3:
+    aux -= 3
+else:
+    aux += 1
 
-#nome = myName[:tamNome-2] + str(aux // 10) + str(aux % 10)
-#ipMeu = socket.gethostbyname(myName)
-#ipProx = socket.gethostbyname(nome)
+nome = myName[:tamNome-2] + str(aux // 10) + str(aux % 10)
+ipMeu = socket.gethostbyname(myName)
+ipProx = socket.gethostbyname(nome)
 
 nextId = ANEL[Id]["proxima"]
 
 #Endereco do destino da mensagem do pc iniciado. guarda ip do proximo e porta do proximo
 #No projeto, a porta sera a mesma para todos os computadores e o id deve ser pego de outra maneira
 
-#nextPc = (ipProx, message.PORTA)
-nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
+nextPc = (ipProx, message.PORTA)
+#nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
 
 #bind no socket
 sockt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#sockt.bind((ipMeu, message.PORTA))
+sockt.bind((ipMeu, message.PORTA))
 
-sockt.bind((ANEL[Id]["ip"], ANEL[Id]["porta"]))
+#sockt.bind((ANEL[Id]["ip"], ANEL[Id]["porta"]))
 
 maoAtual = bytearray()
 jogo = 1
