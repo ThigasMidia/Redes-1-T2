@@ -5,10 +5,10 @@ from libs import message , game , printing
 
 #Definicao de nomes para facilitar
 ANEL = {
-    "A": {"proxima": "B", "ip": "127.0.0.1", "porta": 46961},
-    "B": {"proxima": "C", "ip": "127.0.0.1", "porta": 46962},
-    "C": {"proxima": "D", "ip": "127.0.0.1", "porta": 46963},
-    "D": {"proxima": "A", "ip": "127.0.0.1", "porta": 46964},
+    "A": {"proxima": "B"},
+    "B": {"proxima": "C"},
+    "C": {"proxima": "D"},
+    "D": {"proxima": "A"},
 }
 
 #Pega o ID em argv
@@ -59,13 +59,11 @@ nextId = ANEL[Id]["proxima"]
 #No projeto, a porta sera a mesma para todos os computadores e o id deve ser pego de outra maneira
 
 nextPc = (ipProx, message.PORTA)
-#nextPc = (ANEL[nextId]["ip"], ANEL[nextId]["porta"])
 
 #bind no socket
 sockt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sockt.bind((ipMeu, message.PORTA))
 
-#sockt.bind((ANEL[Id]["ip"], ANEL[Id]["porta"]))
 
 maoAtual = bytearray()
 jogo = 1
