@@ -1,4 +1,4 @@
-from aux import game, message
+from libs import game, message
 
 #Pega o numero (0-51) e transforma na carta
 def numToCarta(num):

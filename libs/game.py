@@ -1,4 +1,4 @@
-from aux import message
+from libs import message
 import random
 
 #Trata passagem de bastao
